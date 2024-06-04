@@ -1,30 +1,40 @@
 #!/usr/bin/python3
-"""This module implement a rule that returns the status of the application"""
-from flask import jsonify
-import models
-from api.v1.views import app_views
+"""
+Creating an endpoint that
+retrieves the number of each objects by type
+"""
+
+
 from models.amenity import Amenity
 from models.city import City
 from models.place import Place
 from models.review import Review
 from models.state import State
 from models.user import User
+from api.v1.views import app_views
+from flask import jsonify
+from models import storage
 
 
-@app_views.route("/status", strict_slashes=False)
-def view_status():
-    """View function that return a json message"""
-    return jsonify({"status": "OK"})
+@app_views.route('/status', methods=['GET'], strict_slashes=False)
+def status():
+    """
+    Returning the status of an API
+        Checking the status 200 - OK
+    """
+
+    return jsonify({"status": "OK"}), 200
 
 
-@app_views.route("/stats", strict_slashes=False)
-def view_stats():
-    """Veiw function that retrieves the number of each object by type"""
-    return jsonify({
-        "amenities": models.storage.count(Amenity),
-        "cities": models.storage.count(City),
-        "places": models.storage.count(Place),
-        "reviews": models.storage.count(Review),
-        "states": models.storage.count(State),
-        "users": models.storage.count(User)
-    })
+@app_views.route('/stats', methods=['GET'], strict_slashes=False)
+def stats():
+    """
+    Retrieving the type of objects
+        Storing all classes into a variable
+    """
+    classes = {"amenities": Amenity, "cities": City, "places": Place,
+               "reviews": Review, "states": State, "users": User}
+    stats = {}
+    for class_name, cls in classes.items():
+        stats[class_name] = storage.count(cls)
+    return jsonify(stats)
